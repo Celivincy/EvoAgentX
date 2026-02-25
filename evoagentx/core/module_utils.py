@@ -3,6 +3,7 @@ import re
 import yaml
 import json
 import regex
+import ast
 from uuid import uuid4
 from datetime import datetime, date 
 from pydantic import BaseModel
@@ -217,9 +218,13 @@ def parse_data_from_text(text: str, datatype: str):
     elif datatype == "bool":
         data = text.lower() in ("true", "yes", "1", "on", "True")
     elif datatype == "list":
-        data = eval(text)
+        data = ast.literal_eval(text)
+        if not isinstance(data, list):
+            raise ValueError(f"Expected `list` value, but got {type(data).__name__}.")
     elif datatype == "dict":
-        data = eval(text)
+        data = ast.literal_eval(text)
+        if not isinstance(data, dict):
+            raise ValueError(f"Expected `dict` value, but got {type(data).__name__}.")
     else:
         # raise ValueError(
         #     f"Invalid value '{datatype}' is detected for `datatype`. "
@@ -397,4 +402,3 @@ def get_base_module_init_error_message(cls, data: Dict[str, Any], errors: List[U
     message += formatted_data
     message += "\n\n" + get_error_message(errors)
     return message
-
